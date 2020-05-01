@@ -1,0 +1,193 @@
+<!-- <router-outlet></router-outlet> -->
+
+<div class="container-fluid">
+
+  <nav class="navbar navbar-light bg-light nav-container">
+    <a class="navbar-brand" href="https://app.bankofhodlers.com/signin">
+      <img src="../assets/boh_logo_new.png" alt="logo">
+    </a>
+    <a class="pull-right">Angular - Todo App</a>
+  </nav>
+
+  <div class="row header-1">
+    <div class="col-6 left-col">
+      Daily Task Manager
+    </div>
+    <div class="col-6 right-col text-right">
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addEditModalCenter"
+        (click)="addEditTask('add', '', '')">Add New Task</button>
+    </div>
+  </div>
+
+  <div class="row header-2">
+    <div class="col-12 complete-per-col text-right" *ngIf="taskDetails?.completedPer">
+      {{taskDetails.completedPer}}%
+    </div>
+  </div>
+
+  
+  <div class="row all-task-row">
+    <!-- start pending section -->
+    <div class="col-12 col-md-4 each-task-container pending-task-body">
+      <div class="row heading-row">
+        <div class="col-12 heading-col">Pending</div>
+      </div>
+      <div class="row task-container-row">
+        <div class="col-12 task-container-col" cdkDropList (cdkDropListDropped)="drop($event)"
+          *ngIf="taskDetails?.taskResponse?.pending?.data.length > 0">
+          <div class="row drag-drop-header-row">
+            <div class="col-7 drag-drop-header-col">Task</div>
+            <div class="col-5 drag-drop-header-col action-col-th">Action</div>
+          </div>
+          <div class="row drag-drop-body-row drag-box" *ngFor="let taskDetail of taskDetails?.taskResponse?.pending?.data; let i = index" cdkDrag>
+            <div class="col-7 drag-drop-body-col">
+              <div class="task-title">{{taskDetail.title}}</div>
+              <div class="task-dec">{{taskDetail.description}}</div>
+            </div>
+            <div class="col-5 drag-drop-body-col action-col-th">
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addEditModalCenter"
+                (click)="addEditTask('edit', taskDetail, i)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+              <button type="button" class="btn btn-primary p-btn" (click)="movetoInprocess(taskDetail, i)" data-toggle="tooltip"
+                title="Move in In process">
+                <i class="fa fa-play" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="btn btn-primary p-btn" (click)="deleteTask('pending', i)" data-toggle="tooltip"
+                title="Delete">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 task-container-col text-center" *ngIf="taskDetails?.taskResponse?.pending?.data.length === 0">No Data!</div>
+      </div>
+    </div>
+    <!-- end pending section -->
+    
+    <!-- start inprocess section -->
+    <div class="col-12 col-md-4 each-task-container inprocess-task-body">
+      <div class="row heading-row">
+        <div class="col-12 heading-col">In process</div>
+      </div>
+      <div class="row task-container-row">
+        <div class="col-12 task-container-col">
+          <table class="table table-bordered" *ngIf="taskDetails?.taskResponse?.inprocess?.data.length > 0">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th class="action-col-th">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let taskDetail of taskDetails?.taskResponse?.inprocess?.data; let i = index">
+                <td>
+                  <div class="task-title">{{taskDetail.title}}</div>
+                  <div class="task-dec">{{taskDetail.description}}</div>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-primary p-btn"
+                    (click)="movetoCompleted(taskDetail, i)"
+                    data-toggle="tooltip" title="Move in completed">
+                    <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                  </button> 
+                  <button type="button" class="btn btn-primary p-btn"
+                    (click)="deleteTask('inprocess', i)"
+                    data-toggle="tooltip" title="Delete">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  </button> 
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-center" *ngIf="taskDetails?.taskResponse?.inprocess?.data.length === 0">No Data!</div>
+        </div>
+      </div>
+    </div>
+    <!-- end inprocess section -->
+
+    <!-- start completed section -->
+    <div class="col-12 col-md-4 each-task-container completed-task-body">
+      <div class="row heading-row">
+        <div class="col-12 heading-col">Completed</div>
+      </div>
+      <div class="row task-container-row">
+        <div class="col-12 task-container-col">
+          <table class="table table-bordered" *ngIf="taskDetails?.taskResponse?.completed?.data.length > 0">
+            <thead>
+              <tr>
+                <th>Task</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let taskDetail of taskDetails?.taskResponse?.completed?.data; let i = index">
+                <td>
+                  <div class="task-title">
+                    {{taskDetail.title}}
+                    <span class="donr-icon-wrap">
+                      <i class="fa fa-check-circle" aria-hidden="true"></i>
+                    </span>
+                  </div>
+                  <div class="task-dec">{{taskDetail.description}}</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-center" *ngIf="taskDetails?.taskResponse?.completed?.data.length === 0">No Data!</div>
+        </div>
+      </div>
+    </div>
+    <!-- end completed section -->
+  </div>
+
+</div>
+
+
+
+
+<!-- start Modal -->
+<div class="modal fade" id="addEditModalCenter" tabindex="-1" role="dialog" aria-labelledby="addEditModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <form name="taskForm" #taskForm="ngForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addEditModalCenterTitle">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row modal-body-container-row">
+            <div class="col-12 col-md-6 modal-body-left-col">
+              <div class="form-group">
+                <input type="text" class="form-control" placeholder="Enter Title" name="title" required
+                   [(ngModel)]="taskDetails.formData.title">
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-control" placeholder="Enter Description" name="description" required
+                  [(ngModel)]="taskDetails.formData.description">
+              </div>
+              <!-- <div class="form-group">
+                <select class="form-control" required name="priority"
+                  [(ngModel)]="taskDetails.formData.priority">
+                  <option value="" disabled selected>-- Select priority --</option>
+                  <option *ngFor="let priority of [1,2,3,4]; let i = index">{{priority}}</option>
+                </select>
+              </div> -->
+            </div>
+            <div class="col-12 col-md-6 modal-body-right-col">
+              <div *ngIf="dateModel?.day">
+                Date: {{dateModel?.day}}/{{dateModel?.month}}/{{dateModel?.year}}
+              </div>
+              <ngb-datepicker #dp [(ngModel)]="dateModel" (navigate)="date = $event.next" name="date"></ngb-datepicker>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" (click)="saveTask()"
+            [disabled]="taskForm.form.invalid || !dateModel?.day">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- end Modal -->
